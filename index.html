@@ -33,6 +33,32 @@
     --shadow: 0 2px 0 rgba(36,31,25,0.08);
   }
 
+  body.dark{
+    --paper: #1E1B17;
+    --paper-2: #2A2620;
+    --paper-3: #332E27;
+    --ink: #EDE6D6;
+    --ink-soft: #C7BCA8;
+    --muted: #8C8272;
+    --seal: #D9564F;
+    --seal-dark: #B8433D;
+    --seal-soft: #E17A72;
+    --indigo: #7D97B3;
+    --indigo-soft: #5A7188;
+    --gold: #C9A15C;
+    --correct: #6FBF7A;
+    --incorrect: #E2726B;
+  }
+
+  .theme-toggle{
+    position:fixed; top:12px; right:12px; z-index:80;
+    width:38px; height:38px; border-radius:50%;
+    border:1.5px solid rgba(36,31,25,0.25);
+    background:var(--paper-2); color:var(--ink);
+    font-size:16px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
 
@@ -628,6 +654,40 @@
   .stat-bar.before{ background:var(--paper-3); border:1px solid rgba(36,31,25,0.25); }
   .stat-bar.after{ background:var(--indigo); }
 
+  /* ---------- My Learning tab ---------- */
+  .teacher-comment-banner{
+    background:rgba(169,130,61,0.12); border:1px solid rgba(169,130,61,0.35);
+    border-radius:9px; padding:12px 14px; font-size:13px; color:var(--ink-soft);
+    margin-bottom:16px; line-height:1.6;
+  }
+  .mylearn-top{ margin-bottom:14px; }
+  .streak-badge{
+    display:inline-block; padding:8px 14px; border-radius:20px;
+    background:rgba(156,43,39,0.1); color:var(--seal); font-weight:700;
+    font-family:'Noto Serif KR', serif; font-size:13.5px;
+  }
+  .goal-box{ margin-bottom:18px; }
+  .goal-label{ font-size:12px; color:var(--muted); margin-bottom:6px; }
+  .weak-banner{
+    background:rgba(47,66,86,0.08); border-left:3px solid var(--indigo);
+    border-radius:0 8px 8px 0; padding:11px 14px; font-size:13px; color:var(--ink-soft);
+    margin:16px 0;
+  }
+  .wrong-note-head{
+    font-family:'Noto Serif KR', serif; font-weight:700; font-size:14.5px;
+    margin:22px 0 10px; padding-bottom:8px; border-bottom:2px solid var(--ink);
+  }
+  .wrong-item{
+    padding:12px 0; border-bottom:1px solid rgba(36,31,25,0.12);
+  }
+  .wrong-item-tag{ font-size:11px; color:var(--muted); margin-bottom:5px; }
+  .wrong-item-q{ font-size:13.5px; color:var(--ink); margin-bottom:6px; line-height:1.55; }
+  .wrong-item-ans{ font-size:12.5px; margin-bottom:5px; }
+  .wrong-item-ans .bad{ color:var(--incorrect); font-weight:600; }
+  .wrong-item-ans .good{ color:var(--correct); font-weight:600; }
+  .wrong-item-explain{ font-size:12px; color:var(--ink-soft); background:var(--paper-2); padding:8px 11px; border-radius:7px; }
+
+
 
   /* ---------- Summary lecture video ---------- */
   .lecture-tabs{ display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
@@ -1000,6 +1060,58 @@
   .class-group-title{ font-family:'Noto Serif KR', serif; font-weight:700; font-size:14.5px; color:var(--indigo); }
   .class-group-stats{ font-size:11.5px; color:var(--ink-soft); }
 
+  /* ---------- Dashboard: new features ---------- */
+  .dash-section-head{
+    font-family:'Noto Serif KR', serif; font-weight:700; font-size:14px;
+    margin:26px 0 10px; padding-bottom:7px; border-bottom:2px solid var(--ink);
+  }
+  .presence-dot{
+    display:inline-block; width:8px; height:8px; border-radius:50%;
+    background:var(--muted); margin-right:2px; flex-shrink:0;
+  }
+  .presence-dot.online{ background:var(--correct); box-shadow:0 0 0 2px rgba(53,96,63,0.2); }
+  .dl-badge{
+    font-size:10px; font-weight:700; padding:2px 8px; border-radius:12px; white-space:nowrap;
+  }
+  .dl-badge.overdue{ background:rgba(156,43,39,0.15); color:var(--incorrect); }
+  .dl-badge.soon{ background:rgba(169,130,61,0.18); color:var(--gold); }
+
+  .deadline-box{
+    background:var(--paper-2); border:1px solid rgba(36,31,25,0.15); border-radius:10px;
+    padding:14px 16px; margin-bottom:18px;
+  }
+  .deadline-label{ font-size:12px; color:var(--ink-soft); margin-bottom:8px; font-weight:600; }
+  .deadline-box input[type="datetime-local"]{
+    flex:1; padding:10px 12px; border:1.5px solid rgba(36,31,25,0.3); border-radius:8px;
+    background:var(--paper); font-family:'Noto Sans KR', sans-serif; font-size:13px; color:var(--ink);
+  }
+
+  .top-missed{ display:flex; flex-direction:column; gap:8px; margin-bottom:8px; }
+  .top-missed-item{ display:flex; align-items:center; gap:10px; padding:9px 10px; background:var(--paper-2); border-radius:8px; }
+  .tm-rank{ font-family:'Noto Serif KR', serif; font-weight:700; color:var(--seal); min-width:18px; }
+  .tm-body{ flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .tm-theme{ font-size:10.5px; color:var(--muted); }
+  .tm-q{ font-size:12.5px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tm-count{ font-size:11.5px; font-weight:600; color:var(--incorrect); white-space:nowrap; }
+
+  .inactive-list{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+  .inactive-chip{
+    font-size:11px; padding:5px 10px; border-radius:14px;
+    background:rgba(156,43,39,0.08); color:var(--incorrect); border:1px solid rgba(156,43,39,0.25);
+  }
+
+  .comment-box{ margin-top:12px; padding-top:12px; border-top:1px dashed rgba(36,31,25,0.2); }
+  .comment-label{ font-size:11px; color:var(--muted); margin-bottom:6px; }
+  .comment-input{
+    width:100%; min-height:56px; padding:9px 11px; border:1.5px solid rgba(36,31,25,0.25);
+    border-radius:8px; background:var(--paper); font-family:'Noto Sans KR', sans-serif;
+    font-size:12.5px; color:var(--ink); resize:vertical; margin-bottom:8px;
+  }
+  .comment-actions{ display:flex; gap:8px; }
+  .icon-btn.danger{ border-color:rgba(156,43,39,0.4); color:var(--incorrect); }
+  .icon-btn.danger:hover{ background:rgba(156,43,39,0.08); }
+
+
   .storage-warning{
     background:rgba(156,43,39,0.08);
     border:1px solid rgba(156,43,39,0.3);
@@ -1018,6 +1130,8 @@
 </style>
 </head>
 <body>
+
+<button class="theme-toggle" id="themeToggleBtn" title="다크모드 전환">🌙</button>
 
 <div class="login-overlay" id="loginOverlay">
   <div class="login-card">
@@ -1114,6 +1228,26 @@ try{
 </script>
 
 <script>
+/* =========================================================
+   THEME (dark mode)
+========================================================= */
+(function(){
+  const saved = localStorage.getItem('theme') || 'light';
+  const btn = document.getElementById('themeToggleBtn');
+  function apply(mode){
+    document.body.classList.toggle('dark', mode==='dark');
+    if(btn) btn.textContent = mode==='dark' ? '☀️' : '🌙';
+  }
+  apply(saved);
+  if(btn){
+    btn.addEventListener('click', ()=>{
+      const now = document.body.classList.contains('dark') ? 'light' : 'dark';
+      localStorage.setItem('theme', now);
+      apply(now);
+    });
+  }
+})();
+
 /* =========================================================
    DATA
 ========================================================= */
@@ -1764,7 +1898,7 @@ async function saveStudentRecord(record){
   if(!hasStorage) return;
   try{
     record.updatedAt = Date.now();
-    await db.collection('students').doc(record.studentKey).set(record);
+    await db.collection('students').doc(record.studentKey).set(record, { merge:true });
   }catch(e){
     console.error('저장에 실패했습니다', e);
   }
@@ -1781,18 +1915,43 @@ async function loadAllStudentRecords(){
   }
 }
 
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function todayStr(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function updateStreak(record){
+  const today = todayStr();
+  if(!record.streak) record.streak = { lastActiveDate:null, count:0 };
+  if(record.streak.lastActiveDate === today) return; // already counted today
+  const y = new Date(); y.setDate(y.getDate()-1);
+  const yesterday = `${y.getFullYear()}-${String(y.getMonth()+1).padStart(2,'0')}-${String(y.getDate()).padStart(2,'0')}`;
+  record.streak.count = (record.streak.lastActiveDate === yesterday) ? (record.streak.count||0)+1 : 1;
+  record.streak.lastActiveDate = today;
+}
+
 async function loginAsStudent(grade, classNum, number, name){
   const studentKey = `${grade}-${classNum}-${number}`;
   let record = await loadStudentRecord(studentKey);
   if(!record){
     record = { studentKey, grade, classNum, number, name, progress: {}, timers: {} };
-    await saveStudentRecord(record);
   } else {
     record.name = name; // keep latest typed name
     record.grade = grade; record.classNum = classNum; record.number = number;
     if(!record.progress) record.progress = {};
     if(!record.timers) record.timers = {};
   }
+  updateStreak(record);
+  if(!record.dailyGoal || record.dailyGoal.date !== todayStr()){
+    record.dailyGoal = { date: todayStr(), text: (record.dailyGoal && record.dailyGoal.text) || '', done:false };
+  }
+  await saveStudentRecord(record);
   studentRecord = record;
   session = { role:'student', studentKey, grade, classNum, number, name: record.name };
 
@@ -1879,10 +2038,22 @@ function syncShortToStorage(idx){
 /* =========================================================
    ENTER APP / HEADER / LOGOUT
 ========================================================= */
+let heartbeatIntervalId = null;
+function startHeartbeat(){
+  if(heartbeatIntervalId) clearInterval(heartbeatIntervalId);
+  heartbeatIntervalId = setInterval(()=>{
+    if(session && session.role==='student' && studentRecord) saveStudentRecord(studentRecord);
+  }, 25000);
+}
+function stopHeartbeat(){
+  if(heartbeatIntervalId){ clearInterval(heartbeatIntervalId); heartbeatIntervalId = null; }
+}
+
 function enterApp(){
   loginOverlay.style.display = 'none';
   appRoot.style.display = 'block';
   renderHeaderCorner();
+  if(session && session.role==='student') startHeartbeat();
   render();
 }
 
@@ -1895,6 +2066,7 @@ function logout(){
   currentShortTopicIdx = null; shortAnswers = {}; shortResults = {};
   escapeStarted = false; escapeStage = 0; escapeSubIndex = 0; escapeCollected = []; escapeCleared = false; escapeModalMissionIdx = null; escapeModalFeedback = ''; escapeCombineFeedback = '';
   if(themeTimerIntervalId){ clearInterval(themeTimerIntervalId); themeTimerIntervalId = null; themeTimerRunningKey = null; }
+  stopHeartbeat();
   // reset login form fields
   studentForm.reset(); teacherForm.reset();
   studentForm.classList.remove('show'); teacherForm.classList.remove('show');
@@ -1928,7 +2100,8 @@ function renderTabs(){
     {id:2, label:"단답 퀴즈", tag:"12개 주제"},
     {id:3, label:"단원 평가", tag:"8문항"},
     {id:4, label:"방탈출 게임", tag:"AI 진행"},
-    {id:5, label:"요약 강의", tag:"영상 2개"}
+    {id:5, label:"요약 강의", tag:"영상 2개"},
+    {id:6, label:"나의 학습", tag: (studentRecord && studentRecord.teacherComment) ? "메모 있음" : "복습·통계"}
   ];
   if(session && session.role === 'teacher'){
     tabsEl.style.display = 'none';
@@ -2037,6 +2210,7 @@ function render(){
 
   updateThemeTimerBar();
 
+  if(currentTab===6){ renderMyLearning(); return; }
   if(currentTab===5){ renderLecture(); return; }
   if(currentTab===4){ renderEscape(); return; }
   if(currentTab===3){ renderExam(); return; }
@@ -2095,6 +2269,139 @@ function renderLecture(){
         frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowfullscreen></iframe>`;
+  });
+}
+
+/* =========================================================
+   MY LEARNING VIEW (탭 6) — 학생 전용: 스트릭·목표·성적그래프·오답노트
+========================================================= */
+function getWrongItems(){
+  const items = [];
+  if(!studentRecord) return items;
+  topics.forEach((t,i)=>{
+    const p = studentRecord.progress && studentRecord.progress[i];
+    if(p && p.graded && p.answers){
+      t.questions.forEach((q,qi)=>{
+        const ua = p.answers[qi];
+        if(ua !== q.answer){
+          items.push({ theme:'① OX 퀴즈', topic:`${t.unit} ${t.title}`, q:q.text,
+            your: ua===true?'O':(ua===false?'X':'미응답'), correct: q.answer?'O':'X', explain:q.explain });
+        }
+      });
+    }
+  });
+  shortTopics.forEach((t,i)=>{
+    const sp = studentRecord.shortProgress && studentRecord.shortProgress[i];
+    if(sp && sp.graded && sp.answers){
+      t.questions.forEach((q,qi)=>{
+        const ua = sp.answers[qi] || '';
+        if(!isShortAnswerCorrect(ua, q.answers)){
+          items.push({ theme:'② 단답 퀴즈', topic:`${t.unit} ${t.title}`, q:q.q,
+            your: ua || '미응답', correct: q.answers[0], explain:q.explain });
+        }
+      });
+    }
+  });
+  if(studentRecord.examProgress && studentRecord.examProgress.graded && studentRecord.examProgress.answers){
+    examData.questions.forEach((q,qi)=>{
+      const ua = studentRecord.examProgress.answers[qi];
+      if(ua !== q.answer){
+        items.push({ theme:'③ 단원 평가', topic:examData.title, q:q.text,
+          your: (ua===null||ua===undefined) ? '미응답' : `${ua+1}번 (${q.options[ua]})`,
+          correct: `${q.answer+1}번 (${q.options[q.answer]})`, explain:q.explain });
+      }
+    });
+  }
+  return items;
+}
+
+function getWeakestTopic(){
+  let worst = null;
+  if(!studentRecord) return null;
+  topics.forEach((t,i)=>{
+    const p = studentRecord.progress && studentRecord.progress[i];
+    if(p && p.graded){
+      const pct = Math.round(p.score/p.total*100);
+      if(!worst || pct < worst.pct) worst = { pct, title:`${t.unit} ${t.title}` };
+    }
+  });
+  shortTopics.forEach((t,i)=>{
+    const sp = studentRecord.shortProgress && studentRecord.shortProgress[i];
+    if(sp && sp.graded){
+      const pct = Math.round(sp.score/sp.total*100);
+      if(!worst || pct < worst.pct) worst = { pct, title:`${t.unit} ${t.title}` };
+    }
+  });
+  return worst;
+}
+
+function renderMiniBar(label, pct){
+  const p = (pct===null || pct===undefined) ? null : pct;
+  return `
+    <div class="stat-row">
+      <div class="stat-row-label">${label}</div>
+      <div class="stat-bars">
+        <div class="stat-bar-wrap"><div class="stat-bar after" style="height:${p===null?4:Math.max(6,p)}%;"></div><span>${p===null?'미응시':p+'%'}</span></div>
+      </div>
+    </div>`;
+}
+
+function renderMyLearning(){
+  const streak = studentRecord.streak || { count:0 };
+  const today = todayStr();
+  const goal = (studentRecord.dailyGoal && studentRecord.dailyGoal.date===today) ? studentRecord.dailyGoal : { date:today, text:'', done:false };
+
+  const oxInfo = computeThemeInfo(studentRecord, 'ox');
+  const shortInfo = computeThemeInfo(studentRecord, 'short');
+  const examInfo = computeThemeInfo(studentRecord, 'exam');
+
+  const weak = getWeakestTopic();
+  const wrongItems = getWrongItems();
+
+  panelEl.innerHTML = `
+    <div class="quiz-head">
+      <div class="eyebrow">나의 학습</div>
+      <h2>${session.name}님의 학습 현황</h2>
+    </div>
+
+    ${studentRecord.teacherComment ? `<div class="teacher-comment-banner">👩‍🏫 선생님 메모: ${escapeHtml(studentRecord.teacherComment)}</div>` : ''}
+
+    <div class="mylearn-top">
+      <div class="streak-badge">🔥 ${streak.count}일 연속 학습 중</div>
+    </div>
+
+    <div class="goal-box">
+      <div class="goal-label">오늘의 목표</div>
+      <div class="chat-input-row">
+        <input type="text" id="goalInput" placeholder="예: OX퀴즈 3개 풀기" value="${(goal.text||'').replace(/"/g,'&quot;')}" ${goal.done?'disabled':''}>
+        <button class="btn ${goal.done?'ghost':''}" id="goalToggleBtn">${goal.done?'완료 취소':'완료 체크'}</button>
+      </div>
+    </div>
+
+    <div class="stat-chart">
+      ${renderMiniBar('① OX 퀴즈', oxInfo.scorePct)}
+      ${renderMiniBar('② 단답 퀴즈', shortInfo.scorePct)}
+      ${renderMiniBar('③ 단원 평가', examInfo.scorePct)}
+    </div>
+
+    ${weak ? `<div class="weak-banner">📌 가장 낮은 정답률: <b>${weak.title}</b> (${weak.pct}%) — 다시 풀어보는 걸 추천해요.</div>` : ''}
+
+    <div class="wrong-note-head">오답노트 (${wrongItems.length}개)</div>
+    ${wrongItems.length===0 ? `<div class="empty-dash">아직 틀린 문제가 없어요. (또는 아직 채점한 문제가 없어요)</div>` : wrongItems.map(it=>`
+      <div class="wrong-item">
+        <div class="wrong-item-tag">${it.theme} · ${it.topic}</div>
+        <div class="wrong-item-q">${it.q}</div>
+        <div class="wrong-item-ans">내 답: <span class="bad">${it.your}</span> · 정답: <span class="good">${it.correct}</span></div>
+        <div class="wrong-item-explain">${it.explain || ''}</div>
+      </div>
+    `).join('')}
+  `;
+
+  document.getElementById('goalToggleBtn').addEventListener('click', ()=>{
+    const input = document.getElementById('goalInput');
+    studentRecord.dailyGoal = { date: today, text: input.value.trim(), done: !goal.done };
+    saveStudentRecord(studentRecord);
+    renderMyLearning();
   });
 }
 
@@ -2602,6 +2909,80 @@ function resetEscapeGame(){
 /* =========================================================
    TEACHER DASHBOARD
 ========================================================= */
+let dashboardDeadline = null;
+
+async function loadDeadline(){
+  if(!hasStorage) return null;
+  try{
+    const doc = await db.collection('settings').doc('deadline').get();
+    return (doc.exists && doc.data().dueAt) ? doc.data().dueAt : null;
+  }catch(e){ return null; }
+}
+
+async function saveDeadline(dueAtMs){
+  if(!hasStorage) return;
+  try{ await db.collection('settings').doc('deadline').set({ dueAt: dueAtMs }); }
+  catch(e){ console.error('기한 저장 실패', e); }
+}
+
+async function deleteStudentRecord(studentKey){
+  if(!hasStorage) return;
+  try{ await db.collection('students').doc(studentKey).delete(); }
+  catch(e){ console.error('삭제 실패', e); }
+}
+
+function aggregateWrongCounts(records){
+  const counts = {};
+  const bump = (key, theme, topicTitle, qText)=>{
+    if(!counts[key]) counts[key] = { theme, topic: topicTitle, q: qText, count:0 };
+    counts[key].count++;
+  };
+  records.forEach(r=>{
+    topics.forEach((t,i)=>{
+      const p = r.progress && r.progress[i];
+      if(p && p.graded && p.answers){
+        t.questions.forEach((q,qi)=>{
+          if(p.answers[qi] !== q.answer) bump(`ox-${i}-${qi}`, '① OX퀴즈', t.title, q.text);
+        });
+      }
+    });
+    shortTopics.forEach((t,i)=>{
+      const sp = r.shortProgress && r.shortProgress[i];
+      if(sp && sp.graded && sp.answers){
+        t.questions.forEach((q,qi)=>{
+          const ua = sp.answers[qi] || '';
+          if(!isShortAnswerCorrect(ua, q.answers)) bump(`short-${i}-${qi}`, '② 단답퀴즈', t.title, q.q);
+        });
+      }
+    });
+    if(r.examProgress && r.examProgress.graded && r.examProgress.answers){
+      examData.questions.forEach((q,qi)=>{
+        if(r.examProgress.answers[qi] !== q.answer) bump(`exam-${qi}`, '③ 단원평가', examData.title, q.text);
+      });
+    }
+  });
+  return Object.values(counts).sort((a,b)=>b.count-a.count).slice(0,10);
+}
+
+function exportDashboardCSV(studentStats){
+  const header = ['학년','반','번호','이름','OX퀴즈(%)','단답퀴즈(%)','단원평가(%)','방탈출게임 진행률(%)','종합점수(%)','종합진행률(%)','OX퀴즈 소요시간','단답퀴즈 소요시간','단원평가 소요시간','방탈출게임 소요시간','최근활동'];
+  const rows = studentStats.map(s=>[
+    s.grade, s.classNum, s.number, s.name,
+    s.themeInfo.ox.scorePct??'', s.themeInfo.short.scorePct??'', s.themeInfo.exam.scorePct??'', s.themeInfo.escape.progressPct,
+    s.overallScore??'', s.overallProgress,
+    s.themeInfo.ox.timeLabel, s.themeInfo.short.timeLabel, s.themeInfo.exam.timeLabel, s.themeInfo.escape.timeLabel,
+    s.updatedAt ? new Date(s.updatedAt).toLocaleString('ko-KR') : '-'
+  ]);
+  const csvLines = [header, ...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
+  const csvContent = '\uFEFF' + csvLines.join('\n');
+  const blob = new Blob([csvContent], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `학생현황_${todayStr()}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 function renderDashboardLoading(){
   panelEl.innerHTML = `
     <div class="empty-dash">
@@ -2611,8 +2992,9 @@ function renderDashboardLoading(){
 }
 
 async function loadDashboardData(){
-  const records = await loadAllStudentRecords();
+  const [records, deadline] = await Promise.all([loadAllStudentRecords(), loadDeadline()]);
   if(!session || session.role !== 'teacher') return; // user logged out while loading
+  dashboardDeadline = deadline;
   renderDashboardContent(records);
 }
 
@@ -2669,6 +3051,10 @@ function computeThemeInfo(record, themeKey){
 }
 
 function renderDashboardContent(records){
+  const now = Date.now();
+  const ONLINE_WINDOW = 90 * 1000;        // 90초 이내 활동 = 접속 중
+  const INACTIVE_DAYS = 3;                 // 3일 이상 미접속 = 알림 대상
+
   // per-student aggregated stats
   const studentStats = records.map(r=>{
     const themeInfo = {};
@@ -2678,7 +3064,12 @@ function renderDashboardContent(records){
     const progressVals = DASH_THEME_DEFS.map(td=>themeInfo[td.key].progressPct);
     const overallProgress = Math.round(progressVals.reduce((a,b)=>a+b,0)/progressVals.length);
     const classLabel = `${r.grade}학년 ${r.classNum}반`;
-    return { key:r.studentKey, grade:r.grade, classNum:r.classNum, number:r.number, name:r.name, classLabel, themeInfo, overallScore, overallProgress };
+    const online = !!r.updatedAt && (now - r.updatedAt) < ONLINE_WINDOW;
+    return {
+      key:r.studentKey, grade:r.grade, classNum:r.classNum, number:r.number, name:r.name,
+      classLabel, themeInfo, overallScore, overallProgress,
+      updatedAt: r.updatedAt || null, online, teacherComment: r.teacherComment || ''
+    };
   }).sort((a,b)=>{
     if(a.grade !== b.grade) return Number(a.grade) - Number(b.grade);
     if(a.classNum !== b.classNum) return Number(a.classNum) - Number(b.classNum);
@@ -2686,6 +3077,9 @@ function renderDashboardContent(records){
   });
 
   const totalStudents = studentStats.length;
+  const onlineCount = studentStats.filter(s=>s.online).length;
+  const inactiveList = studentStats.filter(s=>!s.updatedAt || (now - s.updatedAt) > INACTIVE_DAYS*24*60*60*1000);
+  const topMissed = aggregateWrongCounts(records);
 
   function aggregate(list){
     const scoreVals = list.map(s=>s.overallScore).filter(v=>v!==null);
@@ -2707,6 +3101,16 @@ function renderDashboardContent(records){
     if(pa.grade !== pb.grade) return Number(pa.grade)-Number(pb.grade);
     return Number(pa.classNum)-Number(pb.classNum);
   });
+  const classAggs = {};
+  classLabels.forEach(label=>{ classAggs[label] = aggregate(classGroups[label]); });
+
+  function deadlineBadge(s){
+    if(!dashboardDeadline || s.overallProgress>=100) return '';
+    const diff = dashboardDeadline - now;
+    if(diff < 0) return `<span class="dl-badge overdue">기한 초과</span>`;
+    if(diff < 24*60*60*1000) return `<span class="dl-badge soon">임박</span>`;
+    return '';
+  }
 
   let bodyHtml = '';
   if(totalStudents===0){
@@ -2714,7 +3118,7 @@ function renderDashboardContent(records){
   } else {
     classLabels.forEach(label=>{
       const list = classGroups[label];
-      const agg = aggregate(list);
+      const agg = classAggs[label];
       bodyHtml += `
         <div class="class-group">
           <div class="class-group-head">
@@ -2738,37 +3142,130 @@ function renderDashboardContent(records){
         bodyHtml += `
           <details class="student-row">
             <summary>
+              <span class="presence-dot ${s.online?'online':''}" title="${s.online?'접속 중':'오프라인'}"></span>
               <span class="sid">${s.number}번</span>
               <span class="sname">${s.name}</span>
+              ${deadlineBadge(s)}
               <span class="sprog">진행률 ${s.overallProgress}%</span>
               <span class="savg">${s.overallScore===null?'-':s.overallScore+'%'}</span>
             </summary>
-            <div class="student-detail">${detailRows}</div>
+            <div class="student-detail">
+              ${detailRows}
+              <div class="comment-box">
+                <div class="comment-label">교사 메모 (학생 '나의 학습' 탭에 표시됨)</div>
+                <textarea class="comment-input" data-commentkey="${s.key}" placeholder="예: 오답노트 꼭 다시 확인해보세요">${escapeHtml(s.teacherComment)}</textarea>
+                <div class="comment-actions">
+                  <button class="icon-btn" data-savecommentkey="${s.key}">메모 저장</button>
+                  <button class="icon-btn danger" data-delkey="${s.key}" data-delname="${escapeHtml(s.name)}">이 학생 기록 삭제</button>
+                </div>
+              </div>
+            </div>
           </details>`;
       });
       bodyHtml += `</div></div>`;
     });
   }
 
+  const classCompareChart = classLabels.length ? `
+    <div class="dash-section-head">반별 평균 점수 비교</div>
+    <div class="stat-chart">${classLabels.map(label=>renderMiniBar(label, classAggs[label].avgScore)).join('')}</div>
+  ` : '';
+
+  const topMissedHtml = topMissed.length ? `
+    <div class="dash-section-head">가장 많이 틀린 문항 Top ${topMissed.length}</div>
+    <div class="top-missed">
+      ${topMissed.map((m,i)=>`
+        <div class="top-missed-item">
+          <span class="tm-rank">${i+1}</span>
+          <span class="tm-body"><span class="tm-theme">${m.theme} · ${m.topic}</span><span class="tm-q">${m.q}</span></span>
+          <span class="tm-count">${m.count}명 오답</span>
+        </div>`).join('')}
+    </div>` : '';
+
+  const inactiveHtml = inactiveList.length ? `
+    <div class="dash-section-head">⚠ 최근 ${INACTIVE_DAYS}일 이상 미접속 (${inactiveList.length}명)</div>
+    <div class="inactive-list">
+      ${inactiveList.map(s=>`<span class="inactive-chip">${s.classLabel} ${s.number}번 ${s.name}</span>`).join('')}
+    </div>` : '';
+
+  const deadlineInputValue = dashboardDeadline ? new Date(dashboardDeadline - new Date().getTimezoneOffset()*60000).toISOString().slice(0,16) : '';
+
   panelEl.innerHTML = `
     <div class="dash-top">
       <h2>학생 학습 현황</h2>
       <div class="dash-actions">
+        <button class="icon-btn" id="dashExportBtn">CSV 내보내기</button>
         <button class="icon-btn" id="dashRefreshBtn">새로고침</button>
       </div>
     </div>
     ${!hasStorage ? `<div class="storage-warning">⚠ Firebase 저장소 연결에 실패했습니다. 인터넷 연결을 확인하거나, 잠시 후 새로고침해 주세요.</div>` : ''}
     <div class="stat-cards">
       <div class="stat-card"><div class="n">${totalStudents}</div><div class="l">참여 학생 수</div></div>
+      <div class="stat-card"><div class="n">🟢 ${onlineCount}</div><div class="l">현재 접속 중</div></div>
       <div class="stat-card"><div class="n">${overallAgg.avgScore===null?'-':overallAgg.avgScore+'%'}</div><div class="l">전체 평균 점수</div></div>
       <div class="stat-card"><div class="n">${overallAgg.avgProgress}%</div><div class="l">전체 평균 진행률</div></div>
     </div>
+
+    <div class="deadline-box">
+      <div class="deadline-label">완료 기한 설정 (전체 공통)</div>
+      <div class="chat-input-row">
+        <input type="datetime-local" id="deadlineInput" value="${deadlineInputValue}">
+        <button class="btn" id="deadlineSaveBtn">저장</button>
+      </div>
+      ${dashboardDeadline ? `<div class="pieces-line">현재 설정된 기한: ${new Date(dashboardDeadline).toLocaleString('ko-KR')}</div>` : `<div class="pieces-line">아직 설정된 기한이 없습니다.</div>`}
+    </div>
+
+    ${classCompareChart}
+    ${topMissedHtml}
+    ${inactiveHtml}
+
+    <div class="dash-section-head">반별 · 학생별 상세</div>
     ${bodyHtml}
   `;
 
   document.getElementById('dashRefreshBtn').addEventListener('click', ()=>{
     renderDashboardLoading();
     loadDashboardData();
+  });
+
+  document.getElementById('dashExportBtn').addEventListener('click', ()=>{
+    exportDashboardCSV(studentStats);
+  });
+
+  document.getElementById('deadlineSaveBtn').addEventListener('click', async ()=>{
+    const val = document.getElementById('deadlineInput').value;
+    if(!val) return;
+    await saveDeadline(new Date(val).getTime());
+    renderDashboardLoading();
+    loadDashboardData();
+  });
+
+  panelEl.querySelectorAll('[data-savecommentkey]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const key = btn.dataset.savecommentkey;
+      const textarea = panelEl.querySelector(`textarea[data-commentkey="${key}"]`);
+      btn.disabled = true; btn.textContent = '저장 중...';
+      try{
+        await db.collection('students').doc(key).set({ teacherComment: textarea.value }, { merge:true });
+        btn.textContent = '저장됨 ✓';
+      }catch(e){
+        console.error(e);
+        btn.textContent = '저장 실패';
+      }
+      setTimeout(()=>{ btn.disabled = false; btn.textContent = '메모 저장'; }, 1500);
+    });
+  });
+
+  panelEl.querySelectorAll('[data-delkey]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const key = btn.dataset.delkey;
+      const name = btn.dataset.delname;
+      if(!confirm(`정말 '${name}' 학생의 학습 기록을 삭제할까요?\n이 작업은 되돌릴 수 없습니다.`)) return;
+      btn.disabled = true; btn.textContent = '삭제 중...';
+      await deleteStudentRecord(key);
+      renderDashboardLoading();
+      loadDashboardData();
+    });
   });
 }
 
@@ -2778,6 +3275,7 @@ function renderDashboardContent(records){
 function renderTOC(){
   const doneCount = Object.keys(results).length;
   const totalCount = topics.length;
+
   let avgText = "-";
   if(doneCount>0){
     const totalScore = Object.values(results).reduce((a,r)=>a+r.score,0);
