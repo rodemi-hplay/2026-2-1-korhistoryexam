@@ -561,10 +561,29 @@
     font-family:'Noto Serif KR', serif; font-size:25px; color:var(--ink-soft);
   }
   .theme-timer-bar.done{ border-color:rgba(53,96,63,0.3); background:rgba(53,96,63,0.06); }
+  .theme-timer-bar.paused{ border-color:rgba(169,130,61,0.4); background:rgba(169,130,61,0.08); }
   .theme-timer-bar .ttb-time{ font-weight:700; color:var(--incorrect); }
   .theme-timer-bar.done .ttb-time{ color:var(--incorrect); }
+  .ttb-pause-btn{
+    font-family:'Noto Sans KR', sans-serif;
+    font-size:13px; font-weight:600;
+    padding:6px 14px; border-radius:16px;
+    border:1.5px solid rgba(36,31,25,0.3);
+    background:var(--paper); color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .ttb-pause-btn:hover{ border-color:var(--ink); color:var(--ink); }
+  .theme-timer-bar{ flex-direction:column; }
+  .ttb-row{ display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; }
+  .ttb-note{
+    font-family:'Noto Sans KR', sans-serif;
+    font-size:12px; font-weight:500; color:var(--gold);
+    margin-top:4px; text-align:center;
+  }
+
   @media (max-width:480px){
     .theme-timer-bar{ font-size:18px; flex-wrap:wrap; text-align:center; padding:12px 14px; }
+    .ttb-pause-btn{ font-size:11px; padding:5px 10px; }
   }
 
   /* ---------- Escape game: act rail, stage tiles, modal ---------- */
@@ -1796,7 +1815,10 @@ function normalizeAnswer(str){
 function isShortAnswerCorrect(userText, answerList){
   const norm = normalizeAnswer(userText);
   if(!norm) return false;
-  return answerList.some(a => normalizeAnswer(a) === norm);
+  return answerList.some(a => {
+    const na = normalizeAnswer(a);
+    return na && norm.includes(na);
+  });
 }
 
 let escapeStarted = false;
@@ -2592,6 +2614,13 @@ function enterApp(){
 function logout(){
   const wasStudent = session && session.role === 'student' && !session.isTeacherTest;
   const wasTeacherTest = session && session.isTeacherTest;
+  if(session && session.role==='student' && studentRecord && studentRecord.timers){
+    let stoppedAny = false;
+    Object.values(studentRecord.timers).forEach(t=>{ if(t && t.runningStartedAt){ stopThemeRun(t); stoppedAny = true; } });
+    if(stoppedAny) saveStudentRecord(studentRecord);
+  }
+  lastActiveThemeKey = null;
+  themeManualPause = {};
   session = null;
   studentRecord = null;
   currentTab = 1; currentTopicIdx = null;
@@ -2676,14 +2705,39 @@ function renderTabs(){
 }
 
 /* =========================================================
-   THEME TIMER BAR (탭 1~4 학생 전용)
+   THEME TIMER BAR (탭 1~4 학생 전용) — 일시정지/자동정지 지원
 ========================================================= */
 const THEME_KEYS = {1:'ox', 2:'short', 3:'exam', 4:'escape'};
 const THEME_TIMER_LABELS = {ox:'OX 퀴즈', short:'단답 퀴즈', exam:'단원 평가', escape:'방탈출 게임'};
 let themeTimerIntervalId = null;
 let themeTimerRunningKey = null;
+let lastActiveThemeKey = null;
+let themeManualPause = {}; // themeKey -> boolean (탭에 새로 들어올 때마다 false로 초기화)
+
+const TIMER_STOP_ACCURACY = 90; // 이 정답률(%) 이상이어야 소요 시간이 멈춤
 
 function isThemeComplete(themeKey){
+  if(themeKey==='ox'){
+    if(Object.keys(results).length !== topics.length) return false;
+    const scoreSum = Object.values(results).reduce((a,r)=>a+r.score,0);
+    const totalSum = Object.values(results).reduce((a,r)=>a+r.total,0);
+    return totalSum>0 && (scoreSum/totalSum*100) >= TIMER_STOP_ACCURACY;
+  }
+  if(themeKey==='short'){
+    if(Object.keys(shortResults).length !== shortTopics.length) return false;
+    const scoreSum = Object.values(shortResults).reduce((a,r)=>a+r.score,0);
+    const totalSum = Object.values(shortResults).reduce((a,r)=>a+r.total,0);
+    return totalSum>0 && (scoreSum/totalSum*100) >= TIMER_STOP_ACCURACY;
+  }
+  if(themeKey==='exam'){
+    if(!examResult) return false;
+    return examResult.total>0 && (examResult.score/examResult.total*100) >= TIMER_STOP_ACCURACY;
+  }
+  if(themeKey==='escape') return !!escapeCleared; // 방탈출은 정오답 개념이 없어 완료 여부로만 판단
+  return false;
+}
+
+function isThemeFullyAttempted(themeKey){
   if(themeKey==='ox') return Object.keys(results).length === topics.length;
   if(themeKey==='short') return Object.keys(shortResults).length === shortTopics.length;
   if(themeKey==='exam') return !!examResult;
@@ -2698,51 +2752,129 @@ function formatDuration(ms){
   return `${m}:${String(s).padStart(2,'0')}`;
 }
 
+function normalizeTimer(timer){
+  // 이전 버전 형식({startedAt,...}) 호환 처리
+  if(timer.accumulatedMs === undefined){
+    timer.accumulatedMs = timer.completedAt ? (timer.elapsedMs || 0) : 0;
+    timer.runningStartedAt = timer.completedAt ? null : (timer.startedAt || null);
+    delete timer.startedAt;
+  }
+  return timer;
+}
+
+function getThemeElapsedMs(timer){
+  let ms = timer.accumulatedMs || 0;
+  if(timer.runningStartedAt) ms += Date.now() - timer.runningStartedAt;
+  return ms;
+}
+
+function startThemeRun(timer){
+  if(!timer.runningStartedAt) timer.runningStartedAt = Date.now();
+}
+
+function stopThemeRun(timer){
+  if(timer.runningStartedAt){
+    timer.accumulatedMs = (timer.accumulatedMs || 0) + (Date.now() - timer.runningStartedAt);
+    timer.runningStartedAt = null;
+  }
+}
+
 function updateThemeTimerBar(){
   const bar = document.getElementById('themeTimerBar');
   if(!bar) return;
   const themeKey = THEME_KEYS[currentTab];
+
+  // 다른 탭으로 이동했다면 이전 탭의 타이머는 자동으로 멈춘다.
+  if(lastActiveThemeKey && lastActiveThemeKey !== themeKey && session && session.role==='student' && studentRecord && studentRecord.timers && studentRecord.timers[lastActiveThemeKey]){
+    stopThemeRun(studentRecord.timers[lastActiveThemeKey]);
+    saveStudentRecord(studentRecord);
+  }
+
   if(!session || session.role !== 'student' || !themeKey){
     bar.style.display = 'none';
     if(themeTimerIntervalId){ clearInterval(themeTimerIntervalId); themeTimerIntervalId = null; themeTimerRunningKey = null; }
+    lastActiveThemeKey = null;
     return;
   }
+
+  const freshEntry = (lastActiveThemeKey !== themeKey);
+  if(freshEntry) themeManualPause[themeKey] = false; // 새로 들어올 때는 항상 재생 상태로 시작
+  lastActiveThemeKey = themeKey;
+
   if(!studentRecord.timers) studentRecord.timers = {};
-  if(!studentRecord.timers[themeKey]) studentRecord.timers[themeKey] = { startedAt:null, completedAt:null, elapsedMs:null };
-  const timer = studentRecord.timers[themeKey];
+  if(!studentRecord.timers[themeKey]) studentRecord.timers[themeKey] = { accumulatedMs:0, runningStartedAt:null, completedAt:null, elapsedMs:null };
+  const timer = normalizeTimer(studentRecord.timers[themeKey]);
   const completedNow = isThemeComplete(themeKey);
+  const manuallyPaused = !!themeManualPause[themeKey];
 
   if(completedNow && !timer.completedAt){
+    stopThemeRun(timer);
     timer.completedAt = Date.now();
-    timer.elapsedMs = timer.startedAt ? (timer.completedAt - timer.startedAt) : (timer.elapsedMs || 0);
+    timer.elapsedMs = timer.accumulatedMs;
     saveStudentRecord(studentRecord);
   }
-  if(!completedNow && !timer.startedAt){
-    timer.startedAt = Date.now();
+  if(!completedNow && !manuallyPaused && freshEntry){
+    startThemeRun(timer);
     saveStudentRecord(studentRecord);
   }
 
   bar.style.display = 'flex';
   const label = THEME_TIMER_LABELS[themeKey];
 
+  if(themeTimerIntervalId){ clearInterval(themeTimerIntervalId); themeTimerIntervalId = null; themeTimerRunningKey = null; }
+
   if(timer.completedAt){
-    if(themeTimerIntervalId){ clearInterval(themeTimerIntervalId); themeTimerIntervalId = null; themeTimerRunningKey = null; }
     bar.className = 'theme-timer-bar done';
-    bar.innerHTML = `✅ ${label} 완료 · 소요 시간 <span class="ttb-time">${formatDuration(timer.elapsedMs || 0)}</span>`;
-  } else {
-    bar.className = 'theme-timer-bar';
-    const tick = ()=>{
-      const elapsed = Date.now() - timer.startedAt;
-      bar.innerHTML = `⏱ ${label} 진행 중 · <span class="ttb-time">${formatDuration(elapsed)}</span>`;
-    };
-    tick();
-    if(themeTimerRunningKey !== themeKey){
-      if(themeTimerIntervalId) clearInterval(themeTimerIntervalId);
-      themeTimerIntervalId = setInterval(tick, 1000);
-      themeTimerRunningKey = themeKey;
-    }
+    bar.innerHTML = `<div class="ttb-row">✅ ${label} 완료 · 소요 시간 <span class="ttb-time">${formatDuration(timer.elapsedMs || 0)}</span></div>`;
+    return;
   }
+
+  if(manuallyPaused){
+    bar.className = 'theme-timer-bar paused';
+    bar.innerHTML = `<div class="ttb-row">⏸ ${label} 일시정지 · <span class="ttb-time">${formatDuration(getThemeElapsedMs(timer))}</span> <button class="ttb-pause-btn" id="themeResumeBtn">재개</button></div>`;
+    document.getElementById('themeResumeBtn').addEventListener('click', ()=>{
+      themeManualPause[themeKey] = false;
+      startThemeRun(timer);
+      saveStudentRecord(studentRecord);
+      render();
+    });
+    return;
+  }
+
+  bar.className = 'theme-timer-bar';
+  const fullyAttempted = isThemeFullyAttempted(themeKey);
+  const noteHtml = fullyAttempted ? `<div class="ttb-note">정답률 ${TIMER_STOP_ACCURACY}% 이상이면 시간이 멈춰요 — 다시 풀어서 정답률을 올려보세요!</div>` : '';
+  bar.innerHTML = `
+    <div class="ttb-row">⏱ ${label} 진행 중 · <span class="ttb-time">${formatDuration(getThemeElapsedMs(timer))}</span> <button class="ttb-pause-btn" id="themePauseBtn">일시정지</button></div>
+    ${noteHtml}`;
+  document.getElementById('themePauseBtn').addEventListener('click', ()=>{
+    themeManualPause[themeKey] = true;
+    stopThemeRun(timer);
+    saveStudentRecord(studentRecord);
+    render();
+  });
+  const timeEl = bar.querySelector('.ttb-time');
+  themeTimerIntervalId = setInterval(()=>{
+    if(timeEl) timeEl.textContent = formatDuration(getThemeElapsedMs(timer));
+  }, 1000);
+  themeTimerRunningKey = themeKey;
 }
+
+/* 브라우저 탭 자체를 떠나거나(다른 탭으로 전환, 최소화) 돌아올 때도 자동 일시정지/재개 */
+document.addEventListener('visibilitychange', ()=>{
+  if(!session || session.role !== 'student' || !studentRecord || !studentRecord.timers) return;
+  const themeKey = THEME_KEYS[currentTab];
+  if(!themeKey) return;
+  const timer = studentRecord.timers[themeKey];
+  if(!timer) return;
+  if(document.hidden){
+    if(timer.runningStartedAt){ stopThemeRun(timer); saveStudentRecord(studentRecord); }
+  } else if(!themeManualPause[themeKey] && !isThemeComplete(themeKey) && !timer.runningStartedAt){
+    startThemeRun(timer);
+    saveStudentRecord(studentRecord);
+    render();
+  }
+});
 
 /* =========================================================
    RENDER: MAIN SWITCH
@@ -2758,6 +2890,17 @@ function render(){
   }
 
   updateThemeTimerBar();
+
+  const pausedThemeKey = THEME_KEYS[currentTab];
+  if(pausedThemeKey && themeManualPause[pausedThemeKey] && !isThemeComplete(pausedThemeKey)){
+    panelEl.innerHTML = `
+      <div class="soon">
+        <div class="stamp-mini">일시<br>정지</div>
+        <h3>일시정지 중입니다</h3>
+        <div style="font-size:13px;">위 타이머 옆의 '재개' 버튼을 누르면 문제를 다시 볼 수 있어요.</div>
+      </div>`;
+    return;
+  }
 
   if(currentTab===6){ renderMyLearning(); return; }
   if(currentTab===5){ renderLecture(); return; }
@@ -3807,7 +3950,14 @@ function computeThemeInfo(record, themeKey){
     if(timer.completedAt){
       timeMs = timer.elapsedMs || 0;
       timeLabel = formatDuration(timeMs);
+    } else if(timer.runningStartedAt){
+      timeMs = (timer.accumulatedMs || 0) + (Date.now() - timer.runningStartedAt);
+      timeLabel = `진행 중 (${formatDuration(timeMs)})`;
+    } else if(timer.accumulatedMs){
+      timeMs = timer.accumulatedMs;
+      timeLabel = `일시정지 (${formatDuration(timeMs)})`;
     } else if(timer.startedAt){
+      // 이전 버전 데이터 호환
       timeMs = Date.now() - timer.startedAt;
       timeLabel = `진행 중 (${formatDuration(timeMs)})`;
     }
