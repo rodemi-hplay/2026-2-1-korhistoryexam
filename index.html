@@ -2860,6 +2860,12 @@ function updateThemeTimerBar(){
     stopThemeRun(timer);
     timer.completedAt = Date.now();
     timer.elapsedMs = timer.accumulatedMs;
+    if(themeKey === 'escape' && studentRecord.escapeRaceOptIn === true){
+      if(typeof studentRecord.escapeBestMs !== 'number' || timer.elapsedMs < studentRecord.escapeBestMs){
+        studentRecord.escapeBestMs = timer.elapsedMs;
+        studentRecord.escapeBestAt = Date.now();
+      }
+    }
     saveStudentRecord(studentRecord);
   }
   if(!completedNow && !manuallyPaused && freshEntry){
@@ -3399,7 +3405,7 @@ function openRaceOptInPopup(onChoice){
       <div class="modal-card">
         <div class="modal-eyebrow">방탈출 게임 시작</div>
         <div class="modal-q">⏱ 타임레이스에 참여하시겠습니까?</div>
-        <div class="pieces-line" style="margin-bottom:16px;">'예'를 선택하면 10막을 모두 완료하는 데 걸린 시간이 기록되어, 이 게임 하단과 선생님 화면의 전체 랭킹에 공개됩니다. '아니오'를 선택하면 시간이 기록되지 않고 랭킹에도 나타나지 않아요 — 부담 없이 혼자 학습하듯 즐기실 수 있습니다.</div>
+        <div class="pieces-line" style="margin-bottom:16px;">'예'를 선택하면 10막을 모두 완료하는 데 걸린 시간이 기록되어, 이 게임 하단과 선생님 화면의 전체 랭킹에 공개됩니다. 랭킹에는 항상 본인의 <b>가장 빠른(최고) 기록</b>만 남아요 — 이번 시도가 이전 기록보다 느려도 예전 최고 기록은 그대로 안전하게 유지됩니다. '아니오'를 선택하면 시간이 기록되지 않고 랭킹에도 나타나지 않아요 — 부담 없이 혼자 학습하듯 즐기실 수 있습니다.</div>
         <div class="action-row">
           <button class="btn" id="raceOptInYesBtn">예, 참여할게요</button>
           <button class="btn ghost" id="raceOptInNoBtn">아니오, 혼자 할게요</button>
@@ -3418,12 +3424,11 @@ async function loadEscapeRaceRanking(){
   if(!hasStorage) return [];
   try{
     const snap = await db.collection('students')
-      .where('escapeRaceOptIn', '==', true)
-      .where('escapeProgress.cleared', '==', true)
+      .where('escapeBestMs', '>', 0)
       .get();
     const list = snap.docs.map(d=>d.data())
-      .filter(r=>!r.isTeacherTest && r.timers && r.timers.escape && r.timers.escape.completedAt);
-    list.sort((a,b)=> (a.timers.escape.elapsedMs||0) - (b.timers.escape.elapsedMs||0));
+      .filter(r=>!r.isTeacherTest && typeof r.escapeBestMs === 'number');
+    list.sort((a,b)=> a.escapeBestMs - b.escapeBestMs);
     return list;
   }catch(e){ console.error('랭킹 조회 실패', e); return []; }
 }
@@ -3434,7 +3439,7 @@ function renderRaceList(list){
     <div class="race-item ${i<3?'top3':''}">
       <span class="race-rank">${i+1}</span>
       <span class="race-name">${r.grade}학년 ${r.classNum}반 ${r.number}번 ${escapeHtml(r.name)}</span>
-      <span class="race-time">${formatDuration(r.timers.escape.elapsedMs)}</span>
+      <span class="race-time">${formatDuration(r.escapeBestMs)}</span>
     </div>`).join('') + `</div>`;
 }
 
@@ -4169,8 +4174,8 @@ function renderDashboardContent(records){
     </div>` : '';
 
   const raceRanking = filteredRecords
-    .filter(r=>r.escapeRaceOptIn && r.escapeProgress && r.escapeProgress.cleared && r.timers && r.timers.escape && r.timers.escape.completedAt)
-    .sort((a,b)=> (a.timers.escape.elapsedMs||0) - (b.timers.escape.elapsedMs||0));
+    .filter(r=>typeof r.escapeBestMs === 'number')
+    .sort((a,b)=> a.escapeBestMs - b.escapeBestMs);
   const raceRankingHtml = `
     <div class="dash-section-head">🏁 방탈출 게임 타임레이스 전체 기록 (${raceRanking.length}명)${dashboardClassFilter!=='all' ? ` — ${dashboardClassFilter}` : ''}</div>
     ${renderRaceList(raceRanking)}
