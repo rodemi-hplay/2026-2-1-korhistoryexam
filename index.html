@@ -59,6 +59,20 @@
     display:flex; align-items:center; justify-content:center;
   }
 
+  .global-back-btn{
+    position:fixed; top:12px; left:12px; z-index:80;
+    padding:9px 16px; border-radius:20px;
+    border:1.5px solid rgba(36,31,25,0.25);
+    background:var(--paper-2); color:var(--ink);
+    font-family:'Noto Serif KR', serif; font-size:13px; font-weight:600;
+    cursor:pointer;
+    display:flex; align-items:center; gap:4px;
+  }
+  .global-back-btn:hover{ border-color:var(--seal); color:var(--seal); }
+  @media (max-width:480px){
+    .global-back-btn{ padding:7px 12px; font-size:11.5px; top:10px; left:10px; }
+  }
+
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
 
@@ -1228,6 +1242,7 @@
 <body>
 
 <button class="theme-toggle" id="themeToggleBtn" title="다크모드 전환">🌙</button>
+<button class="global-back-btn" id="globalBackBtn" title="뒤로 가기" style="display:none;">← 뒤로</button>
 
 <div class="login-overlay" id="loginOverlay">
   <div class="login-card">
@@ -1606,7 +1621,7 @@ const examData = {
       answer:4,
       explain:"보통학교 교육 연한을 6년으로 늘린 것은 1920년대 제2차 조선 교육령에 따른 조치로, 3·1 운동 이후 일제가 표방한 '문화 정치' 시기의 일이다. 그러나 진학률에서 여전히 큰 민족 차별이 존재해 문화 정치의 기만적 본질을 보여준다." },
     { text:"다음 자료와 관련된 식민 지배 정책 시기에 일어난 일로 옳지 않은 것은?\n\n핵심적인 친일 인물을 골라 각종 친일 단체를 조직하게 한다. 조선 문제 해결의 성공 여부는 친일 인물을 많이 얻는 데 있으므로 많은 친일 지식인을 긴 안목으로 키운다. ­「사이토 마코토 문서 9」",
-      options:["한국에 의회를 설치하자는 자치 운동이 전개되었다.","일본 의회에 한국 대표를 보내자는 참정권 운동을 전개하였다.","지방 제도를 개정해 도 평의회와 면 협의회 등을 설치하였다.","식민지 통치에 한국인의 의사를 반영한다는 명분으로 중추원을 두었다.","일부 지역에서 선거제를 실시하였지만 선거권과 피선거권은 일정 금액 이상의 세금을 낸 자들에게만 부여되었다."],
+      options:["한국에 의회를 설치하자는 자치 운동이 전개되었다.","일본 의회에 한국 대표를 보내자는 참정권 운동을 전개하였다.","지방 제도를 개정해 도 평의회와 면 협의회 등을 설치하였다.","식민지 통치에 한국인의 의사를 반영한다는 명분으로 중추원을 만들었다.","일부 지역에서 선거제를 실시하였지만 선거권과 피선거권은 일정 금액 이상의 세금을 낸 자들에게만 부여되었다."],
       answer:3,
       explain:"자료는 사이토 마코토 총독이 내세운 '문화 정치' 관련 문서이다. 문화 정치는 친일 세력을 양성해 민족을 분열시키려는 정책이었다. 중추원은 문화 정치가 아니라 1910년대 무단 통치 시기부터 설치되어 있던 형식적 자문 기구이므로, 문화 정치 시기의 새로운 조치로 볼 수 없다." },
     { text:"밑줄 친 '단체'의 명칭으로 옳은 것은?\n\n이 단체는 복벽을 목표로 전국적인 의병 봉기를 준비하였습니다. 또한 조선 총독, 일본 총리 등에게 국권 반환 요구서를 보내려 하다 발각되어 해체되었습니다.",
@@ -1626,9 +1641,9 @@ const examData = {
       answer:3,
       explain:"소련의 대일전 참전과 해방국 임시 정부 구성 원칙 합의는 포츠담 선언(1945.7)이 아니라 그보다 앞선 얄타 회담(1945.2)에서 이루어진 합의이므로, 포츠담 선언의 '결과'로 볼 수 없다." },
     { text:"밑줄 친 '이 시기'에 볼 수 있는 모습으로 가장 적절한 것은?\n\n이 사진은 미주 지역에서 결성된 한인 국방 경위대(맹호군)가 시가행진하는 모습입니다. 이 시기 국외에서는 독립을 준비하기 위한 다양한 움직임이 나타났습니다.",
-      options:["『조선사』를 편찬하는 학자","형평 운동에 참여하는 백정","영화 「아리랑」에 출연하는 배우","3부 통합 운동을 진행하는 독립군","대한민국 건국 강령을 선포하는 임시 정부"],
+      options:["『조선사』를 편찬하는 학자","형평 운동에 참여하는 백정","영화 「아리랑」에 출연하는 배우","3부 통합 운동을 진행하는 독립군","한국 광복군에 합류하는 김원봉과 조선 의용대"],
       answer:4,
-      explain:"맹호군이 결성된 시기는 1940년대 초이다. 1941년 대한민국 임시 정부는 건국 강령을 선포하며 신국가 건설을 준비하였다. 『조선사』 편찬과 3부 통합 운동은 1920년대 말, 형평 운동과 영화 「아리랑」은 1920년대의 일이다." }
+      explain:"맹호군이 결성된 시기는 1940년대 초이다. 김원봉이 이끌던 조선 의용대 일부가 한국광복군에 합류한 것은 1942년으로, 이 시기와 부합한다. 『조선사』 편찬과 3부 통합 운동은 1920년대 말, 형평 운동과 영화 「아리랑」은 1920년대의 일이다." }
   ]
 };
 
@@ -1696,7 +1711,7 @@ const shortTopics = [
       {q:"민족 대표들이 독립 선언식을 거행한 장소는?", answers:["태화관"], explain:"민족 대표들은 탑골 공원이 아닌 태화관에서 별도로 독립 선언식을 하였다."},
       {q:"학생과 시민들이 독립 선언서를 낭독하고 만세 시위를 시작한 장소는?", answers:["탑골공원"], explain:"탑골 공원에서 시작된 만세 시위는 서울을 비롯한 주요 도시로 확산되었다."},
       {q:"일제가 주민을 교회에 감금하고 불을 지른 학살이 일어난 곳은?", answers:["제암리"], explain:"화성 제암리 학살 사건은 일제의 무자비한 탄압을 보여주는 대표 사례이다."},
-      {q:"3·1 운동 이후 일제의 통치 방식이 무단 통치에서 무엇으로 바뀌었나?", answers:["문화정치"], explain:"3·1 운동은 일제의 통치 방식 전환에 직접적인 계기가 되었다."},
+      {q:"3·1 운동 이후 일제의 통치 방식이 무단 통치에서 무엇으로 바뀌었나?", answers:["문화정치","문화통치"], explain:"3·1 운동은 일제의 통치 방식 전환에 직접적인 계기가 되었다."},
       {q:"3·1 운동의 영향으로 수립된 정부는?", answers:["대한민국임시정부"], explain:"3·1 운동은 조직적 독립운동을 이끌 대한민국 임시 정부 수립의 계기가 되었다."},
       {q:"3·1 운동의 영향을 받아 중국에서 일어난 민족 운동은?", answers:["5·4운동","54운동"], explain:"3·1 운동은 중국의 5·4 운동 등 각국의 민족 해방 운동에 영향을 끼쳤다."},
       {q:"시위 과정에서 사용된 문서로, 선동을 위해 뿌려진 것은? (하나만)", answers:["유인문","격문"], explain:"유인문과 격문은 시위를 확산시키는 선전 도구로 활용되었다."}
@@ -1745,7 +1760,7 @@ const shortTopics = [
       {q:"1925년 결성된 사회주의 정당은?", answers:["조선공산당"], explain:"조선 공산당은 사회주의 사상 확산 속에 결성되었다."},
       {q:"사회주의 운동을 탄압하기 위해 1925년 시행된 법은?", answers:["치안유지법"], explain:"치안 유지법은 사회주의 세력과 민족주의 세력의 협력을 모색하게 만든 계기이기도 하다."},
       {q:"1926년 누구의 서거를 계기로 6·10 만세 운동이 계획되었나?", answers:["순종"], explain:"순종의 국장일에 맞춰 대대적인 만세 시위가 계획되었으나 사전에 발각되었다."},
-      {q:"민족주의 세력과의 적극적 제휴를 주장하며 1926년 발표된 선언은?", answers:["정우회선언"], explain:"정우회 선언은 신간회 창립의 중요한 배경이 되었다."},
+      {q:"사회주의 세력이 민족주의 세력과의 적극적 제휴를 주장하며 1926년 발표된 선언은?", answers:["정우회선언"], explain:"정우회 선언은 신간회 창립의 중요한 배경이 되었다."},
       {q:"1927년 창립된 대표적인 민족 협동 전선 단체는?", answers:["신간회"], explain:"신간회는 민족주의 세력과 사회주의 세력이 함께한 민족 유일당 조직이었다."},
       {q:"신간회의 초대 회장은?", answers:["이상재"], explain:"부회장은 홍명희였으며, 국내뿐 아니라 만주·일본에도 지회를 설립하였다."},
       {q:"신간회와 함께 1927년 결성된 여성 운동 단체는?", answers:["근우회"], explain:"근우회는 신간회와 유사한 성격의 여성 민족 운동 단체였다."},
@@ -1769,7 +1784,7 @@ const shortTopics = [
   { unit:"학습주제 17", title:"광복을 위해 노력하다", pages:"교과서 64~68쪽",
     questions:[
       {q:"1935년 의열단·한국독립당·조선혁명당 등이 결집해 창당한 중국 관내 최대 통일 전선 정당은?", answers:["민족혁명당"], explain:"민족혁명당은 중국 관내 최대 규모의 통일 전선 정당이었다."},
-      {q:"민족혁명당에서 이탈한 조소앙·지청천 등이 김구와 함께 1935년 창당한 정당은?", answers:["한국국민당"], explain:"한국 국민당은 김구가 임시 정부를 재정비한 후 창당하였다."},
+      {q:"민족혁명당에 참여하지 않은 김구가 1935년 창당하여 임시 정부를 이끈 정당은?", answers:["한국국민당"], explain:"한국 국민당은 김구가 임시 정부를 재정비한 후 창당하였다."},
       {q:"1937년 김구·조소앙·지청천 등 민족주의 계열이 연합해 결성한 단체는?", answers:["한국광복운동단체연합회"], explain:"이 연합회는 이후 한국독립당(1940) 결성의 기반이 되었다."},
       {q:"1938년 국민당 정부 지원으로 창설된 중국 관내 최초의 한인 무장 부대는?", answers:["조선의용대"], explain:"조선 의용대는 선전전, 정보 수집, 포로 심문 등의 활동을 하였다."},
       {q:"조선 의용대 일부가 화북으로 이동해 결성한 부대는?", answers:["조선의용대화북지대"], explain:"화북 지대는 호가장 전투 등에서 활약하였다."},
@@ -1803,6 +1818,34 @@ let userAnswers = {}; // per topic: array of true/false/null
 let results = {}; // topicIdx -> {score,total}
 let examAnswers = new Array(examData.questions.length).fill(null);
 let examResult = null; // {score,total}
+
+/* =========================================================
+   GLOBAL BACK NAVIGATION
+========================================================= */
+let navStack = [];
+function pushNavState(){
+  navStack.push({ tab: currentTab, topicIdx: currentTopicIdx, shortTopicIdx: currentShortTopicIdxSafe() });
+  updateBackButton();
+}
+function currentShortTopicIdxSafe(){
+  return (typeof currentShortTopicIdx === 'undefined') ? null : currentShortTopicIdx;
+}
+function popNavState(){
+  if(navStack.length === 0) return;
+  const prev = navStack.pop();
+  currentTab = prev.tab;
+  currentTopicIdx = prev.topicIdx;
+  currentShortTopicIdx = prev.shortTopicIdx;
+  updateBackButton();
+  render();
+}
+function updateBackButton(){
+  const btn = document.getElementById('globalBackBtn');
+  if(!btn) return;
+  btn.style.display = (session && navStack.length>0) ? 'flex' : 'none';
+}
+document.getElementById('globalBackBtn').addEventListener('click', popNavState);
+
 
 let currentShortTopicIdx = null;
 let shortAnswers = {}; // per shortTopic idx: array of strings
@@ -2607,6 +2650,8 @@ function enterApp(){
   loginOverlay.style.display = 'none';
   appRoot.style.display = 'block';
   renderHeaderCorner();
+  navStack = [];
+  updateBackButton();
   if(session && session.role==='student') startHeartbeat();
   render();
 }
@@ -2621,6 +2666,8 @@ function logout(){
   }
   lastActiveThemeKey = null;
   themeManualPause = {};
+  navStack = [];
+  updateBackButton();
   session = null;
   studentRecord = null;
   currentTab = 1; currentTopicIdx = null;
@@ -2696,6 +2743,8 @@ function renderTabs(){
   tabsEl.querySelectorAll('.tab').forEach(el=>{
     el.addEventListener('click', ()=>{
       const id = Number(el.dataset.tab);
+      if(id === currentTab) return; // 같은 탭이면 스택에 쌓지 않음
+      pushNavState();
       currentTab = id;
       if(id===1) currentTopicIdx = null;
       if(id===2) currentShortTopicIdx = null;
@@ -3134,6 +3183,7 @@ function renderShortTOC(){
   });
   panelEl.querySelectorAll('.topic-item').forEach(el=>{
     el.addEventListener('click', ()=>{
+      pushNavState();
       currentShortTopicIdx = Number(el.dataset.idx);
       if(!shortAnswers[currentShortTopicIdx]){
         shortAnswers[currentShortTopicIdx] = new Array(shortTopics[currentShortTopicIdx].questions.length).fill('');
@@ -3198,8 +3248,8 @@ function renderShortQuiz(idx){
     </div>
   `;
 
-  document.getElementById('backBtn').addEventListener('click', ()=>{ currentShortTopicIdx=null; render(); });
-  document.getElementById('shortTocBtn').addEventListener('click', ()=>{ currentShortTopicIdx=null; render(); });
+  document.getElementById('backBtn').addEventListener('click', ()=>{ pushNavState(); currentShortTopicIdx=null; render(); });
+  document.getElementById('shortTocBtn').addEventListener('click', ()=>{ pushNavState(); currentShortTopicIdx=null; render(); });
 
   if(!graded){
     panelEl.querySelectorAll('.short-input-row input').forEach(inp=>{
@@ -4385,6 +4435,7 @@ function renderTOC(){
   });
   panelEl.querySelectorAll('.topic-item').forEach(el=>{
     el.addEventListener('click', ()=>{
+      pushNavState();
       currentTopicIdx = Number(el.dataset.idx);
       if(!userAnswers[currentTopicIdx]){
         userAnswers[currentTopicIdx] = new Array(topics[currentTopicIdx].questions.length).fill(null);
@@ -4471,8 +4522,8 @@ function renderQuiz(idx){
     </div>
   `;
 
-  document.getElementById('backBtn').addEventListener('click', ()=>{ currentTopicIdx=null; render(); });
-  document.getElementById('tocBtn').addEventListener('click', ()=>{ currentTopicIdx=null; render(); });
+  document.getElementById('backBtn').addEventListener('click', ()=>{ pushNavState(); currentTopicIdx=null; render(); });
+  document.getElementById('tocBtn').addEventListener('click', ()=>{ pushNavState(); currentTopicIdx=null; render(); });
 
   if(!graded){
     panelEl.querySelectorAll('.ox-btn').forEach(btn=>{
