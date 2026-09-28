@@ -2173,10 +2173,10 @@ const PRESET_AUTH_CODES = {
 
 async function verifyAuthCode(grade, classNum, number, code){
   const key = `${grade}-${classNum}-${number}`;
-  if(hasStorage){
+  if(hasStorage && !firestoreDegraded()){
     try{
-      const doc = await db.collection('authCodes').doc(key).get();
-      if(doc.exists){
+      const doc = await withTimeout(db.collection('authCodes').doc(key).get(), 4000, null);
+      if(doc && doc.exists){
         const data = doc.data();
         if((data.code||'').toLowerCase() === code) return { ok:true };
         return { ok:false, message:'인증번호가 올바르지 않습니다.' };
@@ -2446,18 +2446,33 @@ document.getElementById('teacherTestForm').addEventListener('submit', async (e)=
 /* =========================================================
    STORAGE HELPERS (Firebase Firestore — shared, so teacher can view all students)
 ========================================================= */
+/* Firestore 응답이 지연/중단되어도 화면이 멈추지 않도록 하는 타임아웃 도우미 */
+let firestoreDegradedUntil = 0; // 서버 응답이 불안정하면 잠시 동안 서버 읽기를 건너뜀
+function firestoreDegraded(){ return Date.now() < firestoreDegradedUntil; }
+function withTimeout(promise, ms, fallback){
+  return new Promise((resolve)=>{
+    let done = false;
+    const t = setTimeout(()=>{ if(!done){ done = true; firestoreDegradedUntil = Date.now() + 120000; console.warn('Firestore 응답 지연 — 대체 동작으로 진행'); resolve(fallback); } }, ms);
+    Promise.resolve(promise).then(v=>{ if(!done){ done = true; clearTimeout(t); resolve(v); } })
+      .catch(e=>{ if(!done){ done = true; clearTimeout(t); firestoreDegradedUntil = Date.now() + 120000; console.error(e); resolve(fallback); } });
+  });
+}
+
 async function loadStudentRecord(studentKey){
-  if(!hasStorage) return null;
+  if(!hasStorage || firestoreDegraded()) return null;
   try{
-    const doc = await db.collection('students').doc(studentKey).get();
-    return doc.exists ? doc.data() : null;
+    const doc = await withTimeout(db.collection('students').doc(studentKey).get(), 4000, null);
+    return (doc && doc.exists) ? doc.data() : null;
   }catch(e){
     console.error('불러오기에 실패했습니다', e);
     return null;
   }
 }
 
-async function saveStudentRecord(record){
+/* 저장은 2초 단위로 묶어서(쓰기 횟수 절감) 한 번에 기록합니다. */
+let _saveTimer = null;
+let _pendingRecord = null;
+async function _writeRecord(record){
   if(!hasStorage) return;
   try{
     record.updatedAt = Date.now();
@@ -2466,6 +2481,25 @@ async function saveStudentRecord(record){
     console.error('저장에 실패했습니다', e);
   }
 }
+function saveStudentRecord(record){
+  if(!hasStorage || !record) return Promise.resolve();
+  _pendingRecord = record;
+  if(!_saveTimer){
+    _saveTimer = setTimeout(()=>{
+      _saveTimer = null;
+      const r = _pendingRecord; _pendingRecord = null;
+      if(r) _writeRecord(r);
+    }, 2000);
+  }
+  return Promise.resolve();
+}
+function flushSave(){
+  if(_saveTimer){ clearTimeout(_saveTimer); _saveTimer = null; }
+  const r = _pendingRecord; _pendingRecord = null;
+  if(r) _writeRecord(r);
+}
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) flushSave(); });
+window.addEventListener('pagehide', flushSave);
 
 async function loadAllStudentRecords(){
   if(!hasStorage) return [];
@@ -2566,7 +2600,7 @@ async function loginAsStudent(grade, classNum, number, name, authCode){
     record.authCode = authCode;
     record.authVerifiedAt = Date.now();
   }
-  await saveStudentRecord(record);
+  saveStudentRecord(record);
   markAuthCodeUsed(studentKey, authCode, name);
   hydrateAndEnterAsStudent(record, { role:'student', studentKey, grade, classNum, number, name: record.name });
 }
@@ -2591,7 +2625,7 @@ async function loginAsTeacherTest(name){
   if(!record.dailyGoal || record.dailyGoal.date !== todayStr()){
     record.dailyGoal = { date: todayStr(), text: (record.dailyGoal && record.dailyGoal.text) || '', done:false };
   }
-  await saveStudentRecord(record);
+  saveStudentRecord(record);
   hydrateAndEnterAsStudent(record, { role:'student', studentKey, grade:'교사', classNum:'테스트', number:0, name, isTeacherTest:true });
 }
 
@@ -2639,8 +2673,11 @@ let heartbeatIntervalId = null;
 function startHeartbeat(){
   if(heartbeatIntervalId) clearInterval(heartbeatIntervalId);
   heartbeatIntervalId = setInterval(()=>{
-    if(session && session.role==='student' && studentRecord) saveStudentRecord(studentRecord);
-  }, 25000);
+    if(document.hidden) return;
+    if(session && session.role==='student' && studentRecord && hasStorage){
+      db.collection('students').doc(studentRecord.studentKey).set({ updatedAt: Date.now() }, { merge:true }).catch(()=>{});
+    }
+  }, 60000);
 }
 function stopHeartbeat(){
   if(heartbeatIntervalId){ clearInterval(heartbeatIntervalId); heartbeatIntervalId = null; }
@@ -2664,6 +2701,7 @@ function logout(){
     Object.values(studentRecord.timers).forEach(t=>{ if(t && t.runningStartedAt){ stopThemeRun(t); stoppedAny = true; } });
     if(stoppedAny) saveStudentRecord(studentRecord);
   }
+  flushSave();
   lastActiveThemeKey = null;
   themeManualPause = {};
   navStack = [];
@@ -3420,8 +3458,10 @@ function openRaceOptInPopup(onChoice){
   overlay.addEventListener('click', (e)=>{ if(e.target===overlay) close(); });
 }
 
+let _raceCache = { at:0, list:[] };
 async function loadEscapeRaceRanking(){
   if(!hasStorage) return [];
+  if(Date.now() - _raceCache.at < 60000) return _raceCache.list;
   try{
     const snap = await db.collection('students')
       .where('escapeBestMs', '>', 0)
@@ -3429,6 +3469,7 @@ async function loadEscapeRaceRanking(){
     const list = snap.docs.map(d=>d.data())
       .filter(r=>!r.isTeacherTest && typeof r.escapeBestMs === 'number');
     list.sort((a,b)=> a.escapeBestMs - b.escapeBestMs);
+    _raceCache = { at: Date.now(), list };
     return list;
   }catch(e){ console.error('랭킹 조회 실패', e); return []; }
 }
@@ -4027,7 +4068,7 @@ function computeThemeInfo(record, themeKey){
 function renderDashboardContent(records){
   dashboardLastRecords = records;
   const now = Date.now();
-  const ONLINE_WINDOW = 90 * 1000;        // 90초 이내 활동 = 접속 중
+  const ONLINE_WINDOW = 150 * 1000;       // 150초 이내 활동 = 접속 중
   const INACTIVE_DAYS = 3;                 // 3일 이상 미접속 = 알림 대상
 
   // per-student aggregated stats
